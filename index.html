@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>24hr Stats of Cryptocurency</title>
+    <link rel="stylesheet" href="css/ticker.css" />
+</head>
+
+<body>
+    <heading>
+        <h1 class="heading">Live 24 hour status of
+            <code>Coinbase Pro</code> assets</h1>
+    </heading>
+
+    <section>
+        <div id="app">
+            <div id="div-sort" class="flex-container">
+                <span><b>Sort By: </b></span>
+                <button class="btn" v-for="(value, sortKey) in sortByOptions" 
+                    :key="sortKey"
+                    @click="changeSortBy(sortKey)"
+                    :class="{'btn-active' : sortBy == sortKey }">
+                    {{ value.name }}
+                </button>
+            </div>
+            <hr/>
+            <ul class="flex-container">
+                <li class="list" v-for="product in computeSortBy[sortBy]()" :key="product">
+                    <div class="grid-container"
+                        :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'theme-up' : 'theme-down' ]">
+                        <div class="grid-cell col-span">
+                            <div class="lbl">{{ tickers[product].name }}</div>
+                            <div>{{ product }}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="lbl">open</div>
+                            <div>{{ tickers[product].open_24h }}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="lbl">last</div>
+                            <div>{{ tickers[product].price }}</div>
+                        </div>
+                        <div class="grid-cell col-span"
+                            :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'bg-green' : 'bg-red' ]">
+                            <div class="lbl">24 hr change</div>
+                            <div class="text-large">{{ tickers[product].changePercent }}%</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="lbl">high</div>
+                            <div>{{ tickers[product].high_24h }}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="lbl">volume in {{ base(product) }}</div>
+                            <div>{{ tickers[product].volume_24h }}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="lbl">low</div>
+                            <div>{{ tickers[product].low_24h }}</div>
+                        </div>
+                        <div class="grid-cell">
+                            <div class="lbl">volume in {{ quote(product) }}</div>
+                            <div>{{ tickers[product].vol_quote_24h }}</div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+    <script src="js/ticker.js"></script>
+</body>
+
+</html>
