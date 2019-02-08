@@ -2,6 +2,16 @@
 <html lang="en">
 
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-91007152-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-91007152-1');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -18,19 +28,17 @@
     <section>
         <div id="app">
             <div id="div-sort" class="flex-container">
-                <span><b>Sort By: </b></span>
-                <button class="btn" v-for="(value, sortKey) in sortByOptions" 
-                    :key="sortKey"
-                    @click="changeSortBy(sortKey)"
-                    :class="{'btn-active' : sortBy == sortKey }">
+                <span>
+                    <b>Sort By: </b>
+                </span>
+                <button class="btn" v-for="(value, sortKey) in sortByOptions" :key="sortKey" @click="changeSortBy(sortKey)" :class="{'btn-active' : sortBy == sortKey }">
                     {{ value.name }}
                 </button>
             </div>
             <hr/>
             <ul class="flex-container">
                 <li class="list" v-for="product in computeSortBy[sortBy]()" :key="product">
-                    <div class="grid-container"
-                        :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'theme-up' : 'theme-down' ]">
+                    <div class="grid-container" :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'theme-up' : 'theme-down' ]">
                         <div class="grid-cell col-span">
                             <div class="lbl">{{ tickers[product].name }}</div>
                             <div>{{ product }}</div>
@@ -43,8 +51,7 @@
                             <div class="lbl">last</div>
                             <div>{{ tickers[product].price }}</div>
                         </div>
-                        <div class="grid-cell col-span"
-                            :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'bg-green' : 'bg-red' ]">
+                        <div class="grid-cell col-span" :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'bg-green' : 'bg-red' ]">
                             <div class="lbl">24 hr change</div>
                             <div class="text-large">{{ tickers[product].changePercent }}%</div>
                         </div>
