@@ -1,3 +1,44 @@
+
+fetch('https://api.pro.coinbase.com/currencies').then((res) => {return res.json()})
+.then((currencies) => {
+    fetch('https://api.pro.coinbase.com/products').then((res) => {return res.json()})
+    .then((prods) => {
+
+        let tempProducts = [];
+        let tempTickers = {};
+
+        prods.forEach((prod) => {
+            let obj = {};
+
+            obj.id = prod.id;
+            obj.name = currencies.find((cur) => { return cur.id == prod.id.split('-')[0]}).name;
+
+            tempProducts.push(obj);
+
+           
+            tempTickers[obj.id] = {
+                "name": obj.name,
+                "price":"n/a",
+                "open_24h":"n/a",
+                "volume_24h":"n/a",
+                "low_24h":"n/a",
+                "high_24h":"n/a",
+                "changePercent":"n/a",
+                "vol_quote_24h":"n/a",
+                };
+            // Vue.set(app.tickers, obj.id, tikerObj );
+        });
+
+
+        products = tempProducts;
+        app.tickers = tempTickers;
+
+        startWebSocketConnection();
+
+        
+    })
+});
+
 var products = [
     {"id":"BCH-USD","name":"Bitcoin Cash"},{"id":"BCH-BTC","name":"Bitcoin Cash"},{"id":"BTC-GBP","name":"Bitcoin"},
     {"id":"BTC-EUR","name":"Bitcoin"},{"id":"BCH-GBP","name":"Bitcoin Cash"},
@@ -15,17 +56,18 @@ var products = [
 var tickers = {};
 
 products.forEach((item) => {
-    tickers[item.id] = {
-        "name": item.name,
-        "price":"n/a",
-        "open_24h":"n/a",
-        "volume_24h":"n/a",
-        "low_24h":"n/a",
-        "high_24h":"n/a",
-        "changePercent":"n/a",
-        "vol_quote_24h":"n/a",
-        };
-});
+            tickers[item.id] = {
+                "name": item.name,
+                "price":"n/a",
+                "open_24h":"n/a",
+                "volume_24h":"n/a",
+                "low_24h":"n/a",
+                "high_24h":"n/a",
+                "changePercent":"n/a",
+                "vol_quote_24h":"n/a",
+                };
+        });
+
 
 var app = new Vue({
     el: '#app',
@@ -100,31 +142,38 @@ var app = new Vue({
 
 // ############################ SOCKET CONNECTION #####################################
 
-const socket = new WebSocket('wss://ws-feed.pro.coinbase.com');
-let subscribeMsg = {
-    "type": "subscribe",
-    "product_ids": products.map((item) => item.id),
-    "channels": ["ticker"]
-}
+let socket;
 
-socket.addEventListener('open', (event) => {
+function startWebSocketConnection(){
 
-    socket.send(JSON.stringify(subscribeMsg));
-});
-
-socket.addEventListener('message', (event) => {
-
-    let data = JSON.parse(event.data);
-
-    if (data.type == "ticker"){
-        updateData(data);
+    socket = new WebSocket('wss://ws-feed.pro.coinbase.com');
+    let subscribeMsg = {
+        "type": "subscribe",
+        "product_ids": products.map((item) => item.id),
+        "channels": ["ticker"]
     }
-
-});
-
-socket.addEventListener('close', (event) => {
-    alert('Disconnected!!, Websocket connection is disconnected.');
-});
+    
+    socket.addEventListener('open', (event) => {
+    
+        socket.send(JSON.stringify(subscribeMsg));
+    });
+    
+    socket.addEventListener('message', (event) => {
+    
+        let data = JSON.parse(event.data);
+    
+        if (data.type == "ticker"){
+            updateData(data);
+        }
+    
+    });
+    
+    socket.addEventListener('close', (event) => {
+        if(confirm('Websocket Disconnected!!, Connect Again?')){
+            startWebSocketConnection();
+        }
+    });
+}
 
 function updateData(data){
     let vol24 = parseFloat(data.volume_24h);
