@@ -1,210 +1,271 @@
-
-fetch('https://api.pro.coinbase.com/currencies').then((res) => {return res.json()})
-.then((currencies) => {
-    fetch('https://api.pro.coinbase.com/products').then((res) => {return res.json()})
-    .then((prods) => {
-
+fetch('https://api.pro.coinbase.com/currencies')
+  .then(res => {
+    return res.json();
+  })
+  .then(currencies => {
+    fetch('https://api.pro.coinbase.com/products')
+      .then(res => {
+        return res.json();
+      })
+      .then(prods => {
         let tempProducts = [];
         let tempTickers = {};
 
-        prods.forEach((prod) => {
-            let obj = {};
+        prods.forEach(prod => {
+          let obj = {};
 
-            obj.id = prod.id;
-            obj.name = currencies.find((cur) => { return cur.id == prod.id.split('-')[0]}).name;
+          obj.id = prod.id;
+          obj.name = currencies.find(cur => {
+            return cur.id == prod.id.split('-')[0];
+          }).name;
 
-            tempProducts.push(obj);
+          tempProducts.push(obj);
 
-           
-            tempTickers[obj.id] = {
-                "name": obj.name,
-                "price":"n/a",
-                "open_24h":"n/a",
-                "volume_24h":"n/a",
-                "low_24h":"n/a",
-                "high_24h":"n/a",
-                "changePercent":"n/a",
-                "vol_quote_24h":"n/a",
-                };
-            // Vue.set(app.tickers, obj.id, tikerObj );
+          tempTickers[obj.id] = {
+            name: obj.name,
+            price: 'n/a',
+            open_24h: 'n/a',
+            volume_24h: 'n/a',
+            low_24h: 'n/a',
+            high_24h: 'n/a',
+            changePercent: 'n/a',
+            vol_quote_24h: 'n/a'
+          };
+          // Vue.set(app.tickers, obj.id, tikerObj );
         });
-
 
         products = tempProducts;
         app.tickers = tempTickers;
 
         startWebSocketConnection();
-
-        
-    })
-});
+      });
+  });
 
 var products = [
-    {"id":"BCH-USD","name":"Bitcoin Cash"},{"id":"BCH-BTC","name":"Bitcoin Cash"},{"id":"BTC-GBP","name":"Bitcoin"},
-    {"id":"BTC-EUR","name":"Bitcoin"},{"id":"BCH-GBP","name":"Bitcoin Cash"},
-    {"id":"BCH-EUR","name":"Bitcoin Cash"},{"id":"BTC-USD","name":"Bitcoin"},{"id":"ZEC-USDC","name":"Zcash"},
-    {"id":"DNT-USDC","name":"district0x"},{"id":"LOOM-USDC","name":"Loom Network"},{"id":"DAI-USDC","name":"Dai"},
-    {"id":"GNT-USDC","name":"Golem"},{"id":"MANA-USDC","name":"Decentraland"},
-    {"id":"CVC-USDC","name":"Civic"},{"id":"ETH-USDC","name":"Ether"},{"id":"ZRX-EUR","name":"0x"},
-    {"id":"BAT-USDC","name":"Basic Attention Token"},{"id":"ETC-EUR","name":"Ether Classic"},{"id":"BTC-USDC","name":"Bitcoin"},
-    {"id":"ZRX-USD","name":"0x"},{"id":"ETH-BTC","name":"Ether"},{"id":"ETH-EUR","name":"Ether"},
-    {"id":"ETH-USD","name":"Ether"},{"id":"LTC-BTC","name":"Litecoin"},{"id":"LTC-EUR","name":"Litecoin"},
-    {"id":"LTC-USD","name":"Litecoin"},{"id":"ETC-USD","name":"Ether Classic"},{"id":"ETC-BTC","name":"Ether Classic"},
-    {"id":"ZRX-BTC","name":"0x"},{"id":"ETC-GBP","name":"Ether Classic"},{"id":"ETH-GBP","name":"Ether"},
-    {"id":"LTC-GBP","name":"Litecoin"}];
+  { id: 'BCH-USD', name: 'Bitcoin Cash' },
+  { id: 'BCH-BTC', name: 'Bitcoin Cash' },
+  { id: 'BTC-GBP', name: 'Bitcoin' },
+  { id: 'BTC-EUR', name: 'Bitcoin' },
+  { id: 'BCH-GBP', name: 'Bitcoin Cash' },
+  { id: 'BCH-EUR', name: 'Bitcoin Cash' },
+  { id: 'BTC-USD', name: 'Bitcoin' },
+  { id: 'ZEC-USDC', name: 'Zcash' },
+  { id: 'DNT-USDC', name: 'district0x' },
+  { id: 'LOOM-USDC', name: 'Loom Network' },
+  { id: 'DAI-USDC', name: 'Dai' },
+  { id: 'GNT-USDC', name: 'Golem' },
+  { id: 'MANA-USDC', name: 'Decentraland' },
+  { id: 'CVC-USDC', name: 'Civic' },
+  { id: 'ETH-USDC', name: 'Ether' },
+  { id: 'ZRX-EUR', name: '0x' },
+  { id: 'BAT-USDC', name: 'Basic Attention Token' },
+  { id: 'ETC-EUR', name: 'Ether Classic' },
+  { id: 'BTC-USDC', name: 'Bitcoin' },
+  { id: 'ZRX-USD', name: '0x' },
+  { id: 'ETH-BTC', name: 'Ether' },
+  { id: 'ETH-EUR', name: 'Ether' },
+  { id: 'ETH-USD', name: 'Ether' },
+  { id: 'LTC-BTC', name: 'Litecoin' },
+  { id: 'LTC-EUR', name: 'Litecoin' },
+  { id: 'LTC-USD', name: 'Litecoin' },
+  { id: 'ETC-USD', name: 'Ether Classic' },
+  { id: 'ETC-BTC', name: 'Ether Classic' },
+  { id: 'ZRX-BTC', name: '0x' },
+  { id: 'ETC-GBP', name: 'Ether Classic' },
+  { id: 'ETH-GBP', name: 'Ether' },
+  { id: 'LTC-GBP', name: 'Litecoin' }
+];
 
 var tickers = {};
 
-products.forEach((item) => {
-            tickers[item.id] = {
-                "name": item.name,
-                "price":"n/a",
-                "open_24h":"n/a",
-                "volume_24h":"n/a",
-                "low_24h":"n/a",
-                "high_24h":"n/a",
-                "changePercent":"n/a",
-                "vol_quote_24h":"n/a",
-                };
-        });
-
+products.forEach(item => {
+  tickers[item.id] = {
+    name: item.name,
+    price: 'n/a',
+    open_24h: 'n/a',
+    volume_24h: 'n/a',
+    low_24h: 'n/a',
+    high_24h: 'n/a',
+    changePercent: 'n/a',
+    vol_quote_24h: 'n/a'
+  };
+});
 
 var app = new Vue({
-    el: '#app',
-    data: {
-        products,
-        tickers,
-        sortByOptions: {
-            "alphabetical": { 
-                name: "A - Z",
-                active: false
-            },
-            "quoteVolume": {
-                name: "Quote Volume",
-                active: false
-            },
-            "changePercent": {   
-                name: "Percent Change",
-                active: false
-            }
-        },
-        sortBy: "quoteVolume",
-        sortDirection: "descending"
+  el: '#app',
+  data: {
+    products,
+    tickers,
+    sortByOptions: {
+      alphabetical: {
+        name: 'A - Z',
+        active: false
+      },
+      quoteVolume: {
+        name: 'Quote Volume',
+        active: false
+      },
+      changePercent: {
+        name: 'Percent Change',
+        active: false
+      }
     },
-    computed: {
-        computeSortBy: function() {
-            return {
-                "alphabetical": () => {
-                    if(this.sortDirection == "descending"){
-                        return products.map((item) => item.id).sort().reverse();
-                    }else{
-                        return products.map((item) => item.id).sort();
-                    }                  
-                },
-                "quoteVolume": () => {
-                    return products.map((item) => item.id).sort((a, b) => {
-                        if(this.sortDirection == "descending"){
-                            return parseFloat(this.tickers[b].vol_quote_24h) - parseFloat(this.tickers[a].vol_quote_24h);
-                        }else{
-                            return parseFloat(this.tickers[a].vol_quote_24h) - parseFloat(this.tickers[b].vol_quote_24h);
-                        }
-                    });
-                },
-                "changePercent": () => {
-                    return products.map((item) => item.id).sort((a, b) => {
-                        if(this.sortDirection == "descending"){
-                            return parseFloat(this.tickers[b].changePercent) - parseFloat(this.tickers[a].changePercent);
-                        }else{
-                            return parseFloat(this.tickers[a].changePercent) - parseFloat(this.tickers[b].changePercent);
-                        }
-                    });
-                }
-            }
-        }
-    },
-    methods: {
-        base(p){
-            return p.split('-')[0];
+    sortBy: 'quoteVolume',
+    sortDirection: 'descending'
+  },
+  computed: {
+    computeSortBy: function() {
+      return {
+        alphabetical: () => {
+          if (this.sortDirection == 'descending') {
+            return products
+              .map(item => item.id)
+              .sort()
+              .reverse();
+          } else {
+            return products.map(item => item.id).sort();
+          }
         },
-        quote(p){
-            return p.split('-')[1];
+        quoteVolume: () => {
+          return products
+            .map(item => item.id)
+            .sort((a, b) => {
+              if (this.sortDirection == 'descending') {
+                return (
+                  parseFloat(this.tickers[b].vol_quote_24h) -
+                  parseFloat(this.tickers[a].vol_quote_24h)
+                );
+              } else {
+                return (
+                  parseFloat(this.tickers[a].vol_quote_24h) -
+                  parseFloat(this.tickers[b].vol_quote_24h)
+                );
+              }
+            });
         },
-        changeSortBy(order){
-            this.sortBy = order;
-            if(this.sortDirection == "ascending"){
-                this.sortDirection = "descending";
-            }else{
-                this.sortDirection = "ascending";
-            }
+        changePercent: () => {
+          return products
+            .map(item => item.id)
+            .sort((a, b) => {
+              if (this.sortDirection == 'descending') {
+                return (
+                  parseFloat(this.tickers[b].changePercent) -
+                  parseFloat(this.tickers[a].changePercent)
+                );
+              } else {
+                return (
+                  parseFloat(this.tickers[a].changePercent) -
+                  parseFloat(this.tickers[b].changePercent)
+                );
+              }
+            });
         }
+      };
     }
+  },
+  methods: {
+    base(p) {
+      return p.split('-')[0];
+    },
+    quote(p) {
+      return p.split('-')[1];
+    },
+    changeSortBy(order) {
+      this.sortBy = order;
+      if (this.sortDirection == 'ascending') {
+        this.sortDirection = 'descending';
+      } else {
+        this.sortDirection = 'ascending';
+      }
+    },
+    getDisplayNum(num) {
+      let stringNum =
+        typeof num == 'string' ? Number(num).toFixed() : num.toFixed();
+      if (stringNum.length > 9) {
+        return `${stringNum.slice(0, -9)}.${stringNum.slice(-9, -7)}B`;
+      } else if (stringNum.length > 6) {
+        return `${stringNum.slice(0, -6)}.${stringNum.slice(-6, -4)}M`;
+      } else if (stringNum.length > 3) {
+        return `${stringNum.slice(0, -3)}.${stringNum.slice(-3, -1)}K`;
+      } else {
+        return stringNum;
+      }
+    }
+  }
 });
 
 // ############################ SOCKET CONNECTION #####################################
 
 let socket;
 
-function startWebSocketConnection(){
+function startWebSocketConnection() {
+  socket = new WebSocket('wss://ws-feed.pro.coinbase.com');
+  let subscribeMsg = {
+    type: 'subscribe',
+    product_ids: products.map(item => item.id),
+    channels: ['ticker']
+  };
 
-    socket = new WebSocket('wss://ws-feed.pro.coinbase.com');
-    let subscribeMsg = {
-        "type": "subscribe",
-        "product_ids": products.map((item) => item.id),
-        "channels": ["ticker"]
+  socket.addEventListener('open', event => {
+    socket.send(JSON.stringify(subscribeMsg));
+  });
+
+  socket.addEventListener('message', event => {
+    let data = JSON.parse(event.data);
+
+    if (data.type == 'ticker') {
+      updateData(data);
     }
-    
-    socket.addEventListener('open', (event) => {
-    
-        socket.send(JSON.stringify(subscribeMsg));
-    });
-    
-    socket.addEventListener('message', (event) => {
-    
-        let data = JSON.parse(event.data);
-    
-        if (data.type == "ticker"){
-            updateData(data);
-        }
-    
-    });
-    
-    socket.addEventListener('close', (event) => {
-        if(confirm('Websocket Disconnected!!, Connect Again?')){
-            startWebSocketConnection();
-        }
-    });
+  });
+
+  socket.addEventListener('close', event => {
+    if (confirm('Websocket Disconnected!!, Connect Again?')) {
+      startWebSocketConnection();
+    }
+  });
 }
 
-function updateData(data){
-    let vol24 = parseFloat(data.volume_24h);
-    let last = parseFloat(data.price);
-    let open = parseFloat(data.open_24h);
-    let diff = last - open;
-    let changePercent = (diff/open * 100).toFixed(2);
+function updateData(data) {
+  let vol24 = parseFloat(data.volume_24h);
+  let last = parseFloat(data.price);
+  let open = parseFloat(data.open_24h);
+  let diff = last - open;
+  let changePercent = ((diff / open) * 100).toFixed(2);
+  let quoteTicker = data.product_id.split('-')[1];
 
-    app.tickers[data.product_id].volume_24h = data.volume_24h.slice(0, 11);
-    app.tickers[data.product_id].vol_quote_24h = (vol24 * last).toFixed(8).slice(0, 11);
-    app.tickers[data.product_id].changePercent = changePercent;
+  // this logic doesn't work if in future the baseTicker with no USD or USDC pair is launched.
+  // to find the quote volume in USD equivalent.
+  if (quoteTicker !== 'USD' && quoteTicker !== 'USDC') {
+    let baseTicker = data.product_id.split('-')[0];
+    let baseLastPrice = app.tickers[`${baseTicker}-USD`]
+      ? app.tickers[`${baseTicker}-USD`].price
+      : app.tickers[`${baseTicker}-USDC`].price;
+    app.tickers[data.product_id].vol_quote_24h = (
+      vol24 * parseFloat(baseLastPrice)
+    )
+      .toFixed(8)
+      .slice(0, 11);
+  } else {
+    app.tickers[data.product_id].vol_quote_24h = (vol24 * last)
+      .toFixed(8)
+      .slice(0, 11);
+  }
 
-    // remove extra zeros form fiat currency and stablecoins with value greater than 1
-    if(open > 1){
-        app.tickers[data.product_id].price = data.price.slice(0, -6);
-        app.tickers[data.product_id].open_24h = data.open_24h.slice(0, -6);
-        app.tickers[data.product_id].low_24h = data.low_24h.slice(0, -6);
-        app.tickers[data.product_id].high_24h = data.high_24h.slice(0, -6);
-    }else{
-        app.tickers[data.product_id].price = data.price;
-        app.tickers[data.product_id].open_24h = data.open_24h;
-        app.tickers[data.product_id].low_24h = data.low_24h;
-        app.tickers[data.product_id].high_24h = data.high_24h;
-    }
-    
+  app.tickers[data.product_id].volume_24h = data.volume_24h.slice(0, 11);
+  app.tickers[data.product_id].changePercent = changePercent;
+  app.tickers[data.product_id].price = data.price;
+
+  // remove extra zeros form fiat currency and stablecoins with value greater than 1
+  if (open > 1) {
+    app.tickers[data.product_id].open_24h = data.open_24h.slice(0, -6);
+    app.tickers[data.product_id].low_24h = data.low_24h.slice(0, -6);
+    app.tickers[data.product_id].high_24h = data.high_24h.slice(0, -6);
+  } else {
+    app.tickers[data.product_id].open_24h = data.open_24h;
+    app.tickers[data.product_id].low_24h = data.low_24h;
+    app.tickers[data.product_id].high_24h = data.high_24h;
+  }
 }
-
-
-
-
-
 
 /* setInterval(() => {
     if(app.anim == "anim 1s"){
