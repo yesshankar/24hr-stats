@@ -23,6 +23,7 @@ fetch('https://api.pro.coinbase.com/currencies')
 
           tempTickers[obj.id] = {
             name: obj.name,
+            product_id: 'n/a',
             price: 'n/a',
             open_24h: 'n/a',
             volume_24h: 'n/a',
@@ -34,68 +35,18 @@ fetch('https://api.pro.coinbase.com/currencies')
           // Vue.set(app.tickers, obj.id, tikerObj );
         });
 
-        products = tempProducts;
+        app.products = tempProducts;
         app.tickers = tempTickers;
 
         startWebSocketConnection();
       });
   });
 
-var products = [
-  { id: 'BCH-USD', name: 'Bitcoin Cash' },
-  { id: 'BCH-BTC', name: 'Bitcoin Cash' },
-  { id: 'BTC-GBP', name: 'Bitcoin' },
-  { id: 'BTC-EUR', name: 'Bitcoin' },
-  { id: 'BCH-GBP', name: 'Bitcoin Cash' },
-  { id: 'BCH-EUR', name: 'Bitcoin Cash' },
-  { id: 'BTC-USD', name: 'Bitcoin' },
-  { id: 'ZEC-USDC', name: 'Zcash' },
-  { id: 'DNT-USDC', name: 'district0x' },
-  { id: 'LOOM-USDC', name: 'Loom Network' },
-  { id: 'DAI-USDC', name: 'Dai' },
-  { id: 'GNT-USDC', name: 'Golem' },
-  { id: 'MANA-USDC', name: 'Decentraland' },
-  { id: 'CVC-USDC', name: 'Civic' },
-  { id: 'ETH-USDC', name: 'Ether' },
-  { id: 'ZRX-EUR', name: '0x' },
-  { id: 'BAT-USDC', name: 'Basic Attention Token' },
-  { id: 'ETC-EUR', name: 'Ether Classic' },
-  { id: 'BTC-USDC', name: 'Bitcoin' },
-  { id: 'ZRX-USD', name: '0x' },
-  { id: 'ETH-BTC', name: 'Ether' },
-  { id: 'ETH-EUR', name: 'Ether' },
-  { id: 'ETH-USD', name: 'Ether' },
-  { id: 'LTC-BTC', name: 'Litecoin' },
-  { id: 'LTC-EUR', name: 'Litecoin' },
-  { id: 'LTC-USD', name: 'Litecoin' },
-  { id: 'ETC-USD', name: 'Ether Classic' },
-  { id: 'ETC-BTC', name: 'Ether Classic' },
-  { id: 'ZRX-BTC', name: '0x' },
-  { id: 'ETC-GBP', name: 'Ether Classic' },
-  { id: 'ETH-GBP', name: 'Ether' },
-  { id: 'LTC-GBP', name: 'Litecoin' }
-];
-
-var tickers = {};
-
-products.forEach(item => {
-  tickers[item.id] = {
-    name: item.name,
-    price: 'n/a',
-    open_24h: 'n/a',
-    volume_24h: 'n/a',
-    low_24h: 'n/a',
-    high_24h: 'n/a',
-    changePercent: 'n/a',
-    vol_quote_24h: 'n/a'
-  };
-});
-
 var app = new Vue({
   el: '#app',
   data: {
-    products,
-    tickers,
+    products: [],
+    tickers: {},
     sortByOptions: {
       alphabetical: {
         name: 'A - Z',
@@ -118,16 +69,16 @@ var app = new Vue({
       return {
         alphabetical: () => {
           if (this.sortDirection == 'descending') {
-            return products
+            return this.products
               .map(item => item.id)
               .sort()
               .reverse();
           } else {
-            return products.map(item => item.id).sort();
+            return this.products.map(item => item.id).sort();
           }
         },
         quoteVolume: () => {
-          return products
+          return this.products
             .map(item => item.id)
             .sort((a, b) => {
               if (this.sortDirection == 'descending') {
@@ -144,7 +95,7 @@ var app = new Vue({
             });
         },
         changePercent: () => {
-          return products
+          return this.products
             .map(item => item.id)
             .sort((a, b) => {
               if (this.sortDirection == 'descending') {
@@ -179,8 +130,12 @@ var app = new Vue({
       }
     },
     getDisplayNum(num) {
+      if (num == 'n/a') {
+        // console.log(`typeof num: ${typeof num}, num: ${num}`);
+        return 'N/A';
+      }
       let stringNum =
-        typeof num == 'string' ? Number(num).toFixed() : num.toFixed();
+        typeof num == 'number' ? num.toFixed() : Number(num).toFixed(); // toFixed is to get rid of number after decimal.
       if (stringNum.length > 9) {
         return `${stringNum.slice(0, -9)}.${stringNum.slice(-9, -7)}B`;
       } else if (stringNum.length > 6) {
@@ -202,7 +157,7 @@ function startWebSocketConnection() {
   socket = new WebSocket('wss://ws-feed.pro.coinbase.com');
   let subscribeMsg = {
     type: 'subscribe',
-    product_ids: products.map(item => item.id),
+    product_ids: app.products.map(item => item.id),
     channels: ['ticker']
   };
 
@@ -226,6 +181,7 @@ function startWebSocketConnection() {
 }
 
 function updateData(data) {
+  let tempObj = {};
   let vol24 = parseFloat(data.volume_24h);
   let last = parseFloat(data.price);
   let open = parseFloat(data.open_24h);
@@ -235,38 +191,78 @@ function updateData(data) {
 
   // this logic doesn't work if in future the baseTicker with no USD or USDC pair is launched.
   // to find the quote volume in USD equivalent.
-  if (quoteTicker !== 'USD' && quoteTicker !== 'USDC') {
+  if (quoteTicker == 'USD' || quoteTicker == 'USDC') {
+    // app.tickers[data.product_id].vol_quote_24h = (vol24 * last)
+    tempObj.vol_quote_24h = (vol24 * last).toFixed(8).slice(0, 11);
+  } else {
     let baseTicker = data.product_id.split('-')[0];
-    let baseLastPrice = app.tickers[`${baseTicker}-USD`]
-      ? app.tickers[`${baseTicker}-USD`].price
-      : app.tickers[`${baseTicker}-USDC`].price;
-    app.tickers[data.product_id].vol_quote_24h = (
-      vol24 * parseFloat(baseLastPrice)
-    )
-      .toFixed(8)
-      .slice(0, 11);
-  } else {
-    app.tickers[data.product_id].vol_quote_24h = (vol24 * last)
-      .toFixed(8)
-      .slice(0, 11);
+    let usdBaseLastPrice = app.tickers[`${baseTicker}-USD`];
+    let usdcBaseLastPrice = app.tickers[`${baseTicker}-USDC`];
+    let baseLastPrice;
+
+    if (usdBaseLastPrice != undefined && usdBaseLastPrice.price != 'n/a') {
+      baseLastPrice = usdBaseLastPrice.price;
+    } else if (
+      usdcBaseLastPrice != undefined &&
+      usdcBaseLastPrice.price != 'n/a'
+    ) {
+      baseLastPrice = usdcBaseLastPrice.price;
+    } else {
+      baseLastPrice = 'n/a';
+    }
+
+    if (baseLastPrice != 'n/a') {
+      tempObj.vol_quote_24h = (vol24 * parseFloat(baseLastPrice))
+        .toFixed(8)
+        .slice(0, 11);
+    }
   }
 
-  app.tickers[data.product_id].volume_24h = data.volume_24h.slice(0, 11);
-  app.tickers[data.product_id].changePercent = changePercent;
-  app.tickers[data.product_id].price = data.price;
+  tempObj.product_id = data.product_id;
+  tempObj.volume_24h = data.volume_24h.slice(0, 11);
+  tempObj.changePercent = changePercent;
+  tempObj.price = data.price;
 
-  // remove extra zeros form fiat currency and stablecoins with value greater than 1
-  if (open > 1) {
-    app.tickers[data.product_id].open_24h = data.open_24h.slice(0, -6);
-    app.tickers[data.product_id].low_24h = data.low_24h.slice(0, -6);
-    app.tickers[data.product_id].high_24h = data.high_24h.slice(0, -6);
-  } else {
-    app.tickers[data.product_id].open_24h = data.open_24h;
-    app.tickers[data.product_id].low_24h = data.low_24h;
-    app.tickers[data.product_id].high_24h = data.high_24h;
-  }
+  tempObj.open_24h = parseFloat(data.open_24h).toString();
+  tempObj.low_24h = parseFloat(data.low_24h).toString();
+  tempObj.high_24h = parseFloat(data.high_24h).toString();
+
+  app.tickers[data.product_id] = Object.assign(
+    {},
+    app.tickers[data.product_id],
+    tempObj
+  );
 }
 
+let naCheckInterval;
+// check for ticker that has USD volume N/A because of unknown base currency price that has non USD quote price
+// and force to recalculate if corresponding USD price is available
+function checkForNa() {
+  let tickers = app.tickers;
+  let naFound = false;
+
+  for (const id in tickers) {
+    if (tickers.hasOwnProperty(id)) {
+      if (
+        tickers[id].vol_quote_24h == 'n/a' &&
+        tickers[id].volume_24h != 'n/a'
+      ) {
+        naFound = true;
+        updateData(tickers[id]);
+      }
+    }
+  }
+
+  if (!naFound) {
+    clearInterval(naCheckInterval);
+  }
+
+  // console.count('checkForNa() is called');
+}
+
+setTimeout(() => {
+  naCheckInterval = setInterval(checkForNa, 1000);
+}, 1000);
 /* setInterval(() => {
     if(app.anim == "anim 1s"){
         app.anim = "anim2 1s";
