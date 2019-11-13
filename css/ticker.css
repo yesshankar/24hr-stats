@@ -214,6 +214,10 @@ code {
 }
 
 @media only screen and (max-width: 650px) {
+  html {
+    font-size: 13px;
+  }
+
   ul {
     flex-direction: column;
     align-content: center;
