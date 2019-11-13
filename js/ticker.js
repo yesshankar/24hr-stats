@@ -1,9 +1,9 @@
-fetch('https://api.pro.coinbase.com/currencies')
+fetch("https://api.pro.coinbase.com/currencies")
   .then(res => {
     return res.json();
   })
   .then(currencies => {
-    fetch('https://api.pro.coinbase.com/products')
+    fetch("https://api.pro.coinbase.com/products")
       .then(res => {
         return res.json();
       })
@@ -16,21 +16,21 @@ fetch('https://api.pro.coinbase.com/currencies')
 
           obj.id = prod.id;
           obj.name = currencies.find(cur => {
-            return cur.id == prod.id.split('-')[0];
+            return cur.id == prod.id.split("-")[0];
           }).name;
 
           tempProducts.push(obj);
 
           tempTickers[obj.id] = {
             name: obj.name,
-            product_id: 'n/a',
-            price: 'n/a',
-            open_24h: 'n/a',
-            volume_24h: 'n/a',
-            low_24h: 'n/a',
-            high_24h: 'n/a',
-            changePercent: 'n/a',
-            vol_quote_24h: 'n/a'
+            product_id: "n/a",
+            price: "n/a",
+            open_24h: "n/a",
+            volume_24h: "n/a",
+            low_24h: "n/a",
+            high_24h: "n/a",
+            changePercent: "n/a",
+            vol_quote_24h: "n/a"
           };
           // Vue.set(app.tickers, obj.id, tikerObj );
         });
@@ -43,32 +43,32 @@ fetch('https://api.pro.coinbase.com/currencies')
   });
 
 var app = new Vue({
-  el: '#app',
+  el: "#app",
   data: {
     products: [],
     tickers: {},
     sortByOptions: {
       alphabetical: {
-        name: 'A - Z',
+        name: "A - Z",
         active: false
       },
       quoteVolume: {
-        name: 'Quote Volume',
+        name: "Quote Volume",
         active: false
       },
       changePercent: {
-        name: 'Percent Change',
+        name: "Percent Change",
         active: false
       }
     },
-    sortBy: 'quoteVolume',
-    sortDirection: 'descending'
+    sortBy: "quoteVolume",
+    sortDirection: "descending"
   },
   computed: {
     computeSortBy: function() {
       return {
         alphabetical: () => {
-          if (this.sortDirection == 'descending') {
+          if (this.sortDirection == "descending") {
             return this.products
               .map(item => item.id)
               .sort()
@@ -81,7 +81,7 @@ var app = new Vue({
           return this.products
             .map(item => item.id)
             .sort((a, b) => {
-              if (this.sortDirection == 'descending') {
+              if (this.sortDirection == "descending") {
                 return (
                   parseFloat(this.tickers[b].vol_quote_24h) -
                   parseFloat(this.tickers[a].vol_quote_24h)
@@ -98,7 +98,7 @@ var app = new Vue({
           return this.products
             .map(item => item.id)
             .sort((a, b) => {
-              if (this.sortDirection == 'descending') {
+              if (this.sortDirection == "descending") {
                 return (
                   parseFloat(this.tickers[b].changePercent) -
                   parseFloat(this.tickers[a].changePercent)
@@ -116,26 +116,26 @@ var app = new Vue({
   },
   methods: {
     base(p) {
-      return p.split('-')[0];
+      return p.split("-")[0];
     },
     quote(p) {
-      return p.split('-')[1];
+      return p.split("-")[1];
     },
     changeSortBy(order) {
       this.sortBy = order;
-      if (this.sortDirection == 'ascending') {
-        this.sortDirection = 'descending';
+      if (this.sortDirection == "ascending") {
+        this.sortDirection = "descending";
       } else {
-        this.sortDirection = 'ascending';
+        this.sortDirection = "ascending";
       }
     },
     getDisplayNum(num) {
-      if (num == 'n/a') {
+      if (num == "n/a") {
         // console.log(`typeof num: ${typeof num}, num: ${num}`);
-        return 'N/A';
+        return "N/A";
       }
       let stringNum =
-        typeof num == 'number' ? num.toFixed() : Number(num).toFixed(); // toFixed is to get rid of number after decimal.
+        typeof num == "number" ? num.toFixed() : Number(num).toFixed(); // toFixed is to get rid of number after decimal.
       if (stringNum.length > 9) {
         return `${stringNum.slice(0, -9)}.${stringNum.slice(-9, -7)}B`;
       } else if (stringNum.length > 6) {
@@ -152,33 +152,46 @@ var app = new Vue({
 // ############################ SOCKET CONNECTION #####################################
 
 let socket;
+let isSocketConnected = false;
 
 function startWebSocketConnection() {
-  socket = new WebSocket('wss://ws-feed.pro.coinbase.com');
+  socket = new WebSocket("wss://ws-feed.pro.coinbase.com");
   let subscribeMsg = {
-    type: 'subscribe',
+    type: "subscribe",
     product_ids: app.products.map(item => item.id),
-    channels: ['ticker']
+    channels: ["ticker"]
   };
 
-  socket.addEventListener('open', event => {
+  socket.addEventListener("open", event => {
+    isSocketConnected = true;
     socket.send(JSON.stringify(subscribeMsg));
   });
 
-  socket.addEventListener('message', event => {
+  socket.addEventListener("message", event => {
     let data = JSON.parse(event.data);
 
-    if (data.type == 'ticker') {
+    if (data.type == "ticker") {
       updateData(data);
     }
   });
 
-  socket.addEventListener('close', event => {
-    if (confirm('Websocket Disconnected!!, Connect Again?')) {
+  socket.addEventListener("close", event => {
+    isSocketConnected = false;
+    console.log("Websocket disconnected @ " + new Date().toLocaleString());
+
+    if (document.visibilityState === "visible") {
+      console.log("Abrupt disconnection occured!! Reconnecting Websocket..");
       startWebSocketConnection();
     }
   });
 }
+
+document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState === "visible" && !isSocketConnected) {
+    console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
+    startWebSocketConnection();
+  }
+});
 
 function updateData(data) {
   let tempObj = {};
@@ -187,31 +200,31 @@ function updateData(data) {
   let open = parseFloat(data.open_24h);
   let diff = last - open;
   let changePercent = ((diff / open) * 100).toFixed(2);
-  let quoteTicker = data.product_id.split('-')[1];
+  let quoteTicker = data.product_id.split("-")[1];
 
   // this logic doesn't work if in future the baseTicker with no USD or USDC pair is launched.
   // to find the quote volume in USD equivalent.
-  if (quoteTicker == 'USD' || quoteTicker == 'USDC') {
+  if (quoteTicker == "USD" || quoteTicker == "USDC") {
     // app.tickers[data.product_id].vol_quote_24h = (vol24 * last)
     tempObj.vol_quote_24h = (vol24 * last).toFixed(8).slice(0, 11);
   } else {
-    let baseTicker = data.product_id.split('-')[0];
+    let baseTicker = data.product_id.split("-")[0];
     let usdBaseLastPrice = app.tickers[`${baseTicker}-USD`];
     let usdcBaseLastPrice = app.tickers[`${baseTicker}-USDC`];
     let baseLastPrice;
 
-    if (usdBaseLastPrice != undefined && usdBaseLastPrice.price != 'n/a') {
+    if (usdBaseLastPrice != undefined && usdBaseLastPrice.price != "n/a") {
       baseLastPrice = usdBaseLastPrice.price;
     } else if (
       usdcBaseLastPrice != undefined &&
-      usdcBaseLastPrice.price != 'n/a'
+      usdcBaseLastPrice.price != "n/a"
     ) {
       baseLastPrice = usdcBaseLastPrice.price;
     } else {
-      baseLastPrice = 'n/a';
+      baseLastPrice = "n/a";
     }
 
-    if (baseLastPrice != 'n/a') {
+    if (baseLastPrice != "n/a") {
       tempObj.vol_quote_24h = (vol24 * parseFloat(baseLastPrice))
         .toFixed(8)
         .slice(0, 11);
@@ -244,8 +257,8 @@ function checkForNa() {
   for (const id in tickers) {
     if (tickers.hasOwnProperty(id)) {
       if (
-        tickers[id].vol_quote_24h == 'n/a' &&
-        tickers[id].volume_24h != 'n/a'
+        tickers[id].vol_quote_24h == "n/a" &&
+        tickers[id].volume_24h != "n/a"
       ) {
         naFound = true;
         updateData(tickers[id]);
@@ -263,6 +276,27 @@ function checkForNa() {
 setTimeout(() => {
   naCheckInterval = setInterval(checkForNa, 1000);
 }, 1000);
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth"
+  });
+}
+
+window.onscroll = handleScroll;
+// document.querySelector("body").onscroll = handleScroll;
+let scrollToTopBtn = document.querySelector("#scroll-to-top");
+
+function handleScroll() {
+  if (window.pageYOffset > 500) {
+    scrollToTopBtn.style.opacity = 1;
+  } else {
+    scrollToTopBtn.style.opacity = 0;
+  }
+}
+
 /* setInterval(() => {
     if(app.anim == "anim 1s"){
         app.anim = "anim2 1s";

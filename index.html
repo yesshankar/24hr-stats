@@ -11,9 +11,9 @@
       function gtag() {
         dataLayer.push(arguments);
       }
-      gtag('js', new Date());
+      gtag("js", new Date());
 
-      gtag('config', 'UA-91007152-1');
+      gtag("config", "UA-91007152-1");
     </script>
 
     <meta charset="UTF-8" />
@@ -58,20 +58,20 @@
               class="grid-container"
               :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'theme-up' : 'theme-down' ]"
             >
-              <div class="grid-cell col-span">
+              <div class="grid-cell name">
                 <div class="lbl">{{ tickers[product].name }}</div>
                 <div>{{ product }}</div>
               </div>
-              <div class="grid-cell">
+              <div class="grid-cell open">
                 <div class="lbl">open</div>
                 <div>{{ tickers[product].open_24h }}</div>
               </div>
-              <div class="grid-cell">
+              <div class="grid-cell price">
                 <div class="lbl">current price</div>
                 <div>{{ tickers[product].price }}</div>
               </div>
               <div
-                class="grid-cell col-span"
+                class="grid-cell change"
                 :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'bg-green' : 'bg-red' ]"
               >
                 <div class="lbl">24 hr change</div>
@@ -79,19 +79,19 @@
                   {{ tickers[product].changePercent }}%
                 </div>
               </div>
-              <div class="grid-cell">
+              <div class="grid-cell high">
                 <div class="lbl">high</div>
                 <div>{{ tickers[product].high_24h }}</div>
               </div>
-              <div class="grid-cell">
+              <div class="grid-cell vol-base">
                 <div class="lbl">volume in {{ base(product) }}</div>
                 <div>{{ getDisplayNum(tickers[product].volume_24h) }}</div>
               </div>
-              <div class="grid-cell">
+              <div class="grid-cell low">
                 <div class="lbl">low</div>
                 <div>{{ tickers[product].low_24h }}</div>
               </div>
-              <div class="grid-cell">
+              <div class="grid-cell vol-usd">
                 <div class="lbl">volume in USD</div>
                 <div>{{ getDisplayNum(tickers[product].vol_quote_24h) }}</div>
               </div>
@@ -101,6 +101,10 @@
         <!-- </ul> -->
       </div>
     </section>
+
+    <div id="scroll-to-top" onclick="scrollToTop()">
+      <span>&#9757;</span><span>Top</span>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
