@@ -51,7 +51,7 @@
         <transition-group name="list" tag="ul">
           <li
             class="list"
-            v-for="product in computeSortBy[sortBy]()"
+            v-for="(product, index) in computeSortBy[sortBy]()"
             :key="product"
           >
             <div
@@ -59,7 +59,9 @@
               :class="[ parseFloat(tickers[product].changePercent) > 0 ? 'theme-up' : 'theme-down' ]"
             >
               <div class="grid-cell name">
-                <div class="lbl">{{ tickers[product].name }}</div>
+                <div class="lbl">
+                  {{ index + 1}} - {{ tickers[product].name }}
+                </div>
                 <div>{{ product }}</div>
               </div>
               <div class="grid-cell open">
