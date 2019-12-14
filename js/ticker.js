@@ -112,6 +112,9 @@ var app = new Vue({
             });
         }
       };
+    },
+    product_ids: function() {
+      return this.products.map(item => item.id);
     }
   },
   methods: {
@@ -153,18 +156,20 @@ var app = new Vue({
 
 let socket;
 let isSocketConnected = false;
+let subscribed = false;
 
 function startWebSocketConnection() {
   socket = new WebSocket("wss://ws-feed.pro.coinbase.com");
   let subscribeMsg = {
     type: "subscribe",
-    product_ids: app.products.map(item => item.id),
+    product_ids: app.product_ids,
     channels: ["ticker"]
   };
 
   socket.addEventListener("open", event => {
     isSocketConnected = true;
     socket.send(JSON.stringify(subscribeMsg));
+    subscribed = true;
   });
 
   socket.addEventListener("message", event => {
@@ -177,10 +182,11 @@ function startWebSocketConnection() {
 
   socket.addEventListener("close", event => {
     isSocketConnected = false;
-    console.log("Websocket disconnected @ " + new Date().toLocaleString());
+    subscribed = false;
+    // console.log("Websocket disconnected @ " + new Date().toLocaleString());
 
     if (document.visibilityState === "visible") {
-      console.log("Abrupt disconnection occured!! Reconnecting Websocket..");
+      // console.log("Abrupt disconnection occured!! Reconnecting Websocket..");
       startWebSocketConnection();
     }
   });
@@ -188,10 +194,38 @@ function startWebSocketConnection() {
 
 document.addEventListener("visibilitychange", function() {
   if (document.visibilityState === "visible" && !isSocketConnected) {
-    console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
+    // console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
     startWebSocketConnection();
+  } else if (document.visibilityState === "visible" && !subscribed) {
+    subscribe(app.product_ids, ["ticker"]);
+    subscribed = true;
+    // console.log(`subscribed`);
+  } else if (document.visibilityState !== "visible" && subscribed) {
+    unsubscribe(app.product_ids, ["ticker"]);
+    subscribed = false;
+    // console.log(`UNsubscribed`);
   }
 });
+
+function subscribe(product_ids, channels) {
+  let subscribeMsg = {
+    type: "subscribe",
+    product_ids,
+    channels
+  };
+
+  socket.send(JSON.stringify(subscribeMsg));
+}
+
+function unsubscribe(product_ids, channels) {
+  let subscribeMsg = {
+    type: "unsubscribe",
+    product_ids,
+    channels
+  };
+
+  socket.send(JSON.stringify(subscribeMsg));
+}
 
 function updateData(data) {
   let tempObj = {};
@@ -270,7 +304,7 @@ function checkForNa() {
     clearInterval(naCheckInterval);
   }
 
-  // console.count('checkForNa() is called');
+  // console.count("checkForNa() is called");
 }
 
 setTimeout(() => {
@@ -310,8 +344,8 @@ var mutationObserver = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
         let parent = mutation.target.parentElement;
         let oldAnimation = mutation.target.parentElement.style.animation;
-        // console.log(`typeof oldAnimation: ${typeof oldAnimation} `);
-        // console.log(`oldAnimation: ${oldAnimation}`);
+        console.log(`typeof oldAnimation: ${typeof oldAnimation} `);
+        console.log(`oldAnimation: ${oldAnimation}`);
 
         if(oldAnimation.includes("anim")){
             parent.style.animation = "anim2 1s";
@@ -321,9 +355,9 @@ var mutationObserver = new MutationObserver(function(mutations) {
             parent.style.animation = "anim 1s"
         }
         
-        // console.log(mutation);
-        // console.log(mutation.oldValue);
-        // console.log(mutation.target.textContent);
+        console.log(mutation);
+        console.log(mutation.oldValue);
+        console.log(mutation.target.textContent);
     });
 });
 
