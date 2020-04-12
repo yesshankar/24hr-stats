@@ -1,21 +1,21 @@
 fetch("https://api.pro.coinbase.com/currencies")
-  .then(res => {
+  .then((res) => {
     return res.json();
   })
-  .then(currencies => {
+  .then((currencies) => {
     fetch("https://api.pro.coinbase.com/products")
-      .then(res => {
+      .then((res) => {
         return res.json();
       })
-      .then(prods => {
+      .then((prods) => {
         let tempProducts = [];
         let tempTickers = {};
 
-        prods.forEach(prod => {
+        prods.forEach((prod) => {
           let obj = {};
 
           obj.id = prod.id;
-          obj.name = currencies.find(cur => {
+          obj.name = currencies.find((cur) => {
             return cur.id == prod.id.split("-")[0];
           }).name;
 
@@ -30,7 +30,7 @@ fetch("https://api.pro.coinbase.com/currencies")
             low_24h: "n/a",
             high_24h: "n/a",
             changePercent: "n/a",
-            vol_quote_24h: "n/a"
+            vol_quote_24h: "n/a",
           };
           // Vue.set(app.tickers, obj.id, tikerObj );
         });
@@ -50,72 +50,83 @@ var app = new Vue({
     sortByOptions: {
       alphabetical: {
         name: "A - Z",
-        active: false
+        active: false,
       },
       quoteVolume: {
         name: "Quote Volume",
-        active: false
+        active: false,
       },
       changePercent: {
         name: "Percent Change",
-        active: false
-      }
+        active: false,
+      },
     },
     sortBy: "quoteVolume",
-    sortDirection: "descending"
+    sortDirection: "descending",
+    checkedAssets: {
+      ALL: true,
+      USD: true,
+      USDC: true,
+      BTC: true,
+      EUR: true,
+      GBP: true,
+      DAI: true,
+      ETH: true,
+    },
   },
   computed: {
-    computeSortBy: function() {
+    computeSortBy: function () {
+      let filteredProducts = this.products
+        .map((item) => item.id)
+        .filter((pid) => {
+          let asset = pid.split("-")[1];
+
+          return this.checkedAssets[asset];
+        });
+
       return {
         alphabetical: () => {
           if (this.sortDirection == "descending") {
-            return this.products
-              .map(item => item.id)
-              .sort()
-              .reverse();
+            return filteredProducts.sort().reverse();
           } else {
-            return this.products.map(item => item.id).sort();
+            return filteredProducts.sort();
           }
         },
         quoteVolume: () => {
-          return this.products
-            .map(item => item.id)
-            .sort((a, b) => {
-              if (this.sortDirection == "descending") {
-                return (
-                  parseFloat(this.tickers[b].vol_quote_24h) -
-                  parseFloat(this.tickers[a].vol_quote_24h)
-                );
-              } else {
-                return (
-                  parseFloat(this.tickers[a].vol_quote_24h) -
-                  parseFloat(this.tickers[b].vol_quote_24h)
-                );
-              }
-            });
+          return filteredProducts.sort((a, b) => {
+            if (this.sortDirection == "descending") {
+              return (
+                parseFloat(this.tickers[b].vol_quote_24h) -
+                parseFloat(this.tickers[a].vol_quote_24h)
+              );
+            } else {
+              return (
+                parseFloat(this.tickers[a].vol_quote_24h) -
+                parseFloat(this.tickers[b].vol_quote_24h)
+              );
+            }
+          });
         },
         changePercent: () => {
-          return this.products
-            .map(item => item.id)
-            .sort((a, b) => {
-              if (this.sortDirection == "descending") {
-                return (
-                  parseFloat(this.tickers[b].changePercent) -
-                  parseFloat(this.tickers[a].changePercent)
-                );
-              } else {
-                return (
-                  parseFloat(this.tickers[a].changePercent) -
-                  parseFloat(this.tickers[b].changePercent)
-                );
-              }
-            });
-        }
+          return filteredProducts.sort((a, b) => {
+            if (this.sortDirection == "descending") {
+              return (
+                parseFloat(this.tickers[b].changePercent) -
+                parseFloat(this.tickers[a].changePercent)
+              );
+            } else {
+              return (
+                parseFloat(this.tickers[a].changePercent) -
+                parseFloat(this.tickers[b].changePercent)
+              );
+            }
+          });
+        },
       };
     },
-    product_ids: function() {
-      return this.products.map(item => item.id);
-    }
+    product_ids: function () {
+      return this.products.map((item) => item.id);
+    },
   },
   methods: {
     base(p) {
@@ -148,8 +159,15 @@ var app = new Vue({
       } else {
         return stringNum;
       }
-    }
-  }
+    },
+    toggleCheckboxes: function () {
+      for (const key in this.checkedAssets) {
+        if (this.checkedAssets.hasOwnProperty(key)) {
+          this.checkedAssets[key] = this.checkedAssets.ALL;
+        }
+      }
+    },
+  },
 });
 
 // ############################ SOCKET CONNECTION #####################################
@@ -163,16 +181,16 @@ function startWebSocketConnection() {
   let subscribeMsg = {
     type: "subscribe",
     product_ids: app.product_ids,
-    channels: ["ticker"]
+    channels: ["ticker"],
   };
 
-  socket.addEventListener("open", event => {
+  socket.addEventListener("open", (event) => {
     isSocketConnected = true;
     socket.send(JSON.stringify(subscribeMsg));
     subscribed = true;
   });
 
-  socket.addEventListener("message", event => {
+  socket.addEventListener("message", (event) => {
     let data = JSON.parse(event.data);
 
     if (data.type == "ticker") {
@@ -180,7 +198,7 @@ function startWebSocketConnection() {
     }
   });
 
-  socket.addEventListener("close", event => {
+  socket.addEventListener("close", (event) => {
     isSocketConnected = false;
     subscribed = false;
     // console.log("Websocket disconnected @ " + new Date().toLocaleString());
@@ -192,7 +210,7 @@ function startWebSocketConnection() {
   });
 }
 
-document.addEventListener("visibilitychange", function() {
+document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible" && !isSocketConnected) {
     // console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
     startWebSocketConnection();
@@ -211,7 +229,7 @@ function subscribe(product_ids, channels) {
   let subscribeMsg = {
     type: "subscribe",
     product_ids,
-    channels
+    channels,
   };
 
   socket.send(JSON.stringify(subscribeMsg));
@@ -221,7 +239,7 @@ function unsubscribe(product_ids, channels) {
   let subscribeMsg = {
     type: "unsubscribe",
     product_ids,
-    channels
+    channels,
   };
 
   socket.send(JSON.stringify(subscribeMsg));
@@ -315,7 +333,7 @@ function scrollToTop() {
   window.scrollTo({
     top: 0,
     left: 0,
-    behavior: "smooth"
+    behavior: "smooth",
   });
 }
 

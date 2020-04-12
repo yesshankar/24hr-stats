@@ -10,6 +10,16 @@
     -moz-osx-font-smoothing: grayscale; */
 }
 
+#assets-filter {
+  padding-bottom: 5px;
+  display: flex;
+  justify-content: center;
+}
+
+#assets-filter span {
+  padding: 5px;
+}
+
 body {
   background-color: #e9fffd;
 }

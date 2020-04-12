@@ -32,6 +32,47 @@
 
     <section>
       <div id="app">
+        <div id="assets-filter">
+          <span><b>Filter:</b></span>
+          <span
+            ><input
+              type="checkbox"
+              id="cb-all"
+              v-model="checkedAssets.ALL"
+              @change="toggleCheckboxes"
+            />
+            <label for="cb-all">All</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-usd" v-model="checkedAssets.USD" />
+            <label for="cb-usd">USD</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-usdc" v-model="checkedAssets.USDC" />
+            <label for="cb-usdc">USDC</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-btc" v-model="checkedAssets.BTC" />
+            <label for="cb-btc">BTC</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-eur" v-model="checkedAssets.EUR" />
+            <label for="cb-eur">EUR</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-gbp" v-model="checkedAssets.GBP" />
+            <label for="cb-gbp">GBP</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-dai" v-model="checkedAssets.DAI" />
+            <label for="cb-dai">DAI</label></span
+          >
+          <span
+            ><input type="checkbox" id="cb-eth" v-model="checkedAssets.ETH" />
+            <label for="cb-eth">ETH</label></span
+          >
+        </div>
+
         <div id="div-sort" class="flex-container">
           <span>
             <b>Sort By: </b>
