@@ -44,31 +44,66 @@
             <label for="cb-all">All</label></span
           >
           <span
-            ><input type="checkbox" id="cb-usd" v-model="checkedAssets.USD" />
+            ><input
+              type="checkbox"
+              id="cb-usd"
+              v-model="checkedAssets.USD"
+              @change="toggleAll"
+            />
             <label for="cb-usd">USD</label></span
           >
           <span
-            ><input type="checkbox" id="cb-usdc" v-model="checkedAssets.USDC" />
+            ><input
+              type="checkbox"
+              id="cb-usdc"
+              v-model="checkedAssets.USDC"
+              @change="toggleAll"
+            />
             <label for="cb-usdc">USDC</label></span
           >
           <span
-            ><input type="checkbox" id="cb-btc" v-model="checkedAssets.BTC" />
+            ><input
+              type="checkbox"
+              id="cb-btc"
+              v-model="checkedAssets.BTC"
+              @change="toggleAll"
+            />
             <label for="cb-btc">BTC</label></span
           >
           <span
-            ><input type="checkbox" id="cb-eur" v-model="checkedAssets.EUR" />
+            ><input
+              type="checkbox"
+              id="cb-eur"
+              v-model="checkedAssets.EUR"
+              @change="toggleAll"
+            />
             <label for="cb-eur">EUR</label></span
           >
           <span
-            ><input type="checkbox" id="cb-gbp" v-model="checkedAssets.GBP" />
+            ><input
+              type="checkbox"
+              id="cb-gbp"
+              v-model="checkedAssets.GBP"
+              @change="toggleAll"
+            />
             <label for="cb-gbp">GBP</label></span
           >
           <span
-            ><input type="checkbox" id="cb-dai" v-model="checkedAssets.DAI" />
+            ><input
+              type="checkbox"
+              id="cb-dai"
+              v-model="checkedAssets.DAI"
+              @change="toggleAll"
+            />
             <label for="cb-dai">DAI</label></span
           >
           <span
-            ><input type="checkbox" id="cb-eth" v-model="checkedAssets.ETH" />
+            ><input
+              type="checkbox"
+              id="cb-eth"
+              v-model="checkedAssets.ETH"
+              @change="toggleAll"
+            />
             <label for="cb-eth">ETH</label></span
           >
         </div>
