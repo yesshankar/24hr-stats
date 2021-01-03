@@ -37,6 +37,7 @@ fetch("https://api.pro.coinbase.com/currencies")
 
         app.products = tempProducts;
         app.tickers = tempTickers;
+        app.holdedTickers = tempTickers;
 
         startWebSocketConnection();
       });
@@ -47,6 +48,8 @@ var app = new Vue({
   data: {
     products: [],
     tickers: {},
+    holdedTickers: {},
+    ignoreNewData: false,
     sortByOptions: {
       alphabetical: {
         name: "A - Z",
@@ -64,14 +67,14 @@ var app = new Vue({
     sortBy: "quoteVolume",
     sortDirection: "descending",
     checkedAssets: {
-      ALL: true,
+      ALL: false,
       USD: true,
       USDC: true,
-      BTC: true,
-      EUR: true,
-      GBP: true,
-      DAI: true,
-      ETH: true,
+      BTC: false,
+      EUR: false,
+      GBP: false,
+      DAI: false,
+      ETH: false,
     },
   },
   computed: {
@@ -136,6 +139,7 @@ var app = new Vue({
       return p.split("-")[1];
     },
     changeSortBy(order) {
+      this.holdNewDataUpdate();
       this.sortBy = order;
       if (this.sortDirection == "ascending") {
         this.sortDirection = "descending";
@@ -161,6 +165,7 @@ var app = new Vue({
       }
     },
     toggleCheckboxes: function () {
+      this.holdNewDataUpdate();
       for (const key in this.checkedAssets) {
         if (this.checkedAssets.hasOwnProperty(key)) {
           this.checkedAssets[key] = this.checkedAssets.ALL;
@@ -168,6 +173,7 @@ var app = new Vue({
       }
     },
     toggleAll: function () {
+      this.holdNewDataUpdate();
       for (const key in this.checkedAssets) {
         if (!this.checkedAssets[key] && key != "ALL") {
           this.checkedAssets.ALL = false;
@@ -175,6 +181,12 @@ var app = new Vue({
         }
       }
       this.checkedAssets.ALL = true;
+    },
+    holdNewDataUpdate: function () {
+      this.ignoreNewData = true;
+      setTimeout(() => {
+        this.ignoreNewData = false;
+      }, 3000);
     },
   },
 });
@@ -197,13 +209,24 @@ function startWebSocketConnection() {
     isSocketConnected = true;
     socket.send(JSON.stringify(subscribeMsg));
     subscribed = true;
+    setTimeout(() => {
+      app.ignoreNewData = true;
+    }, 500);
+    setTimeout(() => {
+      app.ignoreNewData = false;
+      setInterval(() => {
+        app.tickers = Object.assign({}, app.holdedTickers);
+      }, 1000);
+    }, 5000);
   });
 
   socket.addEventListener("message", (event) => {
     let data = JSON.parse(event.data);
 
     if (data.type == "ticker") {
-      updateData(data);
+      if (!app.ignoreNewData) {
+        updateData(data);
+      }
     }
   });
 
@@ -301,9 +324,9 @@ function updateData(data) {
   tempObj.low_24h = parseFloat(data.low_24h).toString();
   tempObj.high_24h = parseFloat(data.high_24h).toString();
 
-  app.tickers[data.product_id] = Object.assign(
+  app.holdedTickers[data.product_id] = Object.assign(
     {},
-    app.tickers[data.product_id],
+    app.holdedTickers[data.product_id],
     tempObj
   );
 }
