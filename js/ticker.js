@@ -37,7 +37,7 @@ fetch("https://api.pro.coinbase.com/currencies")
 
         app.products = tempProducts;
         app.tickers = tempTickers;
-        app.holdedTickers = tempTickers;
+        app.holdedTickers = Object.assign({}, tempTickers);
 
         startWebSocketConnection();
       });
@@ -139,7 +139,7 @@ var app = new Vue({
       return p.split("-")[1];
     },
     changeSortBy(order) {
-      this.holdNewDataUpdate();
+      // this.holdNewDataUpdate();
       this.sortBy = order;
       if (this.sortDirection == "ascending") {
         this.sortDirection = "descending";
@@ -165,7 +165,7 @@ var app = new Vue({
       }
     },
     toggleCheckboxes: function () {
-      this.holdNewDataUpdate();
+      // this.holdNewDataUpdate();
       for (const key in this.checkedAssets) {
         if (this.checkedAssets.hasOwnProperty(key)) {
           this.checkedAssets[key] = this.checkedAssets.ALL;
@@ -173,7 +173,7 @@ var app = new Vue({
       }
     },
     toggleAll: function () {
-      this.holdNewDataUpdate();
+      // this.holdNewDataUpdate();
       for (const key in this.checkedAssets) {
         if (!this.checkedAssets[key] && key != "ALL") {
           this.checkedAssets.ALL = false;
@@ -182,12 +182,17 @@ var app = new Vue({
       }
       this.checkedAssets.ALL = true;
     },
-    holdNewDataUpdate: function () {
+    /*  holdNewDataUpdate: function () {
       this.ignoreNewData = true;
       setTimeout(() => {
         this.ignoreNewData = false;
       }, 3000);
-    },
+    }, */
+  },
+  mounted: function () {
+    setInterval(() => {
+      this.tickers = Object.assign({}, this.holdedTickers);
+    }, 1000);
   },
 });
 
@@ -214,9 +219,6 @@ function startWebSocketConnection() {
     }, 500);
     setTimeout(() => {
       app.ignoreNewData = false;
-      setInterval(() => {
-        app.tickers = Object.assign({}, app.holdedTickers);
-      }, 1000);
     }, 5000);
   });
 
