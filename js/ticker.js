@@ -201,6 +201,8 @@ var app = new Vue({
 let socket;
 let isSocketConnected = false;
 let subscribed = false;
+let unsubscribeTimeout = null;
+let aboutToUnsubscribe = false;
 
 function startWebSocketConnection() {
   socket = new WebSocket("wss://ws-feed.pro.coinbase.com");
@@ -245,6 +247,13 @@ function startWebSocketConnection() {
 }
 
 document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible") {
+    if (aboutToUnsubscribe) {
+      clearTimeout(unsubscribeTimeout);
+      aboutToUnsubscribe = false;
+    }
+  }
+
   if (document.visibilityState === "visible" && !isSocketConnected) {
     // console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
     startWebSocketConnection();
@@ -253,9 +262,13 @@ document.addEventListener("visibilitychange", function () {
     subscribed = true;
     // console.log(`subscribed`);
   } else if (document.visibilityState !== "visible" && subscribed) {
-    unsubscribe(app.product_ids, ["ticker"]);
-    subscribed = false;
-    // console.log(`UNsubscribed`);
+    unsubscribeTimeout = setTimeout(() => {
+      unsubscribe(app.product_ids, ["ticker"]);
+      subscribed = false;
+      // console.log(`UNsubscribed`);
+      aboutToUnsubscribe = false;
+    }, 60000);
+    aboutToUnsubscribe = true;
   }
 });
 
