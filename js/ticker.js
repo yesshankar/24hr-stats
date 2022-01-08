@@ -39,7 +39,7 @@ fetch("https://api.pro.coinbase.com/currencies")
         app.tickers = tempTickers;
         app.holdedTickers = Object.assign({}, tempTickers);
 
-        startWebSocketConnection();
+        // startWebSocketConnection();
       });
   });
 
@@ -262,31 +262,31 @@ function startWebSocketConnection() {
   });
 }
 
-document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "visible") {
-    if (aboutToUnsubscribe) {
-      clearTimeout(unsubscribeTimeout);
-      aboutToUnsubscribe = false;
-    }
-  }
+// document.addEventListener("visibilitychange", function () {
+//   if (document.visibilityState === "visible") {
+//     if (aboutToUnsubscribe) {
+//       clearTimeout(unsubscribeTimeout);
+//       aboutToUnsubscribe = false;
+//     }
+//   }
 
-  if (document.visibilityState === "visible" && !isSocketConnected) {
-    // console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
-    startWebSocketConnection();
-  } else if (document.visibilityState === "visible" && !subscribed) {
-    subscribe(app.product_ids, ["ticker"]);
-    subscribed = true;
-    // console.log(`subscribed`);
-  } else if (document.visibilityState !== "visible" && subscribed) {
-    unsubscribeTimeout = setTimeout(() => {
-      unsubscribe(app.product_ids, ["ticker"]);
-      subscribed = false;
-      // console.log(`UNsubscribed`);
-      aboutToUnsubscribe = false;
-    }, 60000);
-    aboutToUnsubscribe = true;
-  }
-});
+//   if (document.visibilityState === "visible" && !isSocketConnected) {
+//     // console.log("Reconnecting Websocket... @ " + new Date().toLocaleString());
+//     startWebSocketConnection();
+//   } else if (document.visibilityState === "visible" && !subscribed) {
+//     subscribe(app.product_ids, ["ticker"]);
+//     subscribed = true;
+//     // console.log(`subscribed`);
+//   } else if (document.visibilityState !== "visible" && subscribed) {
+//     unsubscribeTimeout = setTimeout(() => {
+//       unsubscribe(app.product_ids, ["ticker"]);
+//       subscribed = false;
+//       // console.log(`UNsubscribed`);
+//       aboutToUnsubscribe = false;
+//     }, 60000);
+//     aboutToUnsubscribe = true;
+//   }
+// });
 
 function subscribe(product_ids, channels) {
   let subscribeMsg = {
