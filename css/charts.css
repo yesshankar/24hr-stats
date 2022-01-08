@@ -1,0 +1,27 @@
+.half {
+  width: 50%;
+}
+
+#charts {
+  position: fixed;
+  top: 2px;
+  right: 2px;
+  height: 98vh;
+  width: 98vh;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+
+#chart1,
+#chart2 {
+  border: 2px solid red;
+}
+
+#close {
+  position: fixed;
+  width: 18px;
+  height: 18px;
+  top: 2px;
+  right: 2px;
+  cursor: pointer;
+}
