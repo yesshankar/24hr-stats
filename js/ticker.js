@@ -441,6 +441,9 @@ function populateChart(elem, cid, product) {
                 "enable_publishing": false,
                 "hide_side_toolbar": false,
                 "allow_symbol_change": true,
+                "studies": [
+                  "BB@tv-basicstudies"
+                ],
                 "container_id": "tradingview_${cid}"
             }
         );
