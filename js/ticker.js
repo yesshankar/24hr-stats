@@ -46,6 +46,8 @@ fetch("https://api.pro.coinbase.com/currencies")
 var app = new Vue({
   el: "#app",
   data: {
+    showCharts: false,
+    onFirstChart: true,
     products: [],
     tickers: {},
     holdedTickers: {},
@@ -132,6 +134,20 @@ var app = new Vue({
     },
   },
   methods: {
+    loadChart(product) {
+      if (document.getElementById("app").clientWidth < 900) {
+        return;
+      }
+      this.showCharts = true;
+      setTimeout(() => {
+        if (this.onFirstChart) {
+          populateChart(document.getElementById("chart1"), "628e7", product);
+        } else {
+          populateChart(document.getElementById("chart2"), "628e8", product);
+        }
+        this.onFirstChart = !this.onFirstChart;
+      }, 500);
+    },
     base(p) {
       return p.split("-")[0];
     },
@@ -394,6 +410,43 @@ function handleScroll() {
   } else {
     scrollToTopBtn.style.opacity = 0;
   }
+}
+
+function populateChart(elem, cid, product) {
+  let width = elem.clientWidth;
+  let height = elem.clientHeight;
+  let symbol = `COINBASE:${product.split("-").join("")}`;
+
+  elem.innerHTML = `
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container">
+            <div id="tradingview_${cid}"></div>
+        </div>
+        <!-- TradingView Widget END -->
+    `;
+
+  tvScript = document.createElement("script");
+  tvScript.textContent = `
+        new TradingView.widget(
+            {
+                "width": ${width},
+                "height": ${height},
+                "symbol": "${symbol}",
+                "interval": "60",
+                "timezone": "America/Chicago",
+                "theme": "Dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_${cid}"
+            }
+        );
+    `;
+
+  elem.children[0].appendChild(tvScript);
 }
 
 /* setInterval(() => {
