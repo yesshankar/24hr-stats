@@ -72,6 +72,7 @@ var app = new Vue({
       ALL: false,
       USD: true,
       USDC: true,
+      USDT: true,
       BTC: false,
       EUR: false,
       GBP: false,
@@ -319,7 +320,7 @@ function updateData(data) {
 
   // this logic doesn't work if in future the baseTicker with no USD or USDC pair is launched.
   // to find the quote volume in USD equivalent.
-  if (quoteTicker == "USD" || quoteTicker == "USDC") {
+  if (quoteTicker == "USD" || quoteTicker == "USDC" || quoteTicker == "USDT") {
     // app.tickers[data.product_id].vol_quote_24h = (vol24 * last)
     tempObj.vol_quote_24h = (vol24 * last).toFixed(8).slice(0, 11);
   } else {
