@@ -226,7 +226,7 @@ function startWebSocketConnection() {
   let subscribeMsg = {
     type: "subscribe",
     product_ids: app.product_ids,
-    channels: ["ticker"],
+    channels: ["ticker_1000"],
   };
 
   socket.addEventListener("open", (event) => {
