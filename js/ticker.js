@@ -15,9 +15,15 @@ fetch("https://api.pro.coinbase.com/currencies")
           let obj = {};
 
           obj.id = prod.id;
-          obj.name = currencies.find((cur) => {
+          let curObj = currencies.find((cur) => {
             return cur.id == prod.id.split("-")[0];
-          }).name;
+          });
+          if (curObj) {
+            obj.name = curObj.name;
+          } else {
+            obj.name = prod.id;
+            // console.log(prod.id, " has no corresponding currency name");
+          }
 
           tempProducts.push(obj);
 
