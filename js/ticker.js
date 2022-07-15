@@ -15,6 +15,7 @@ fetch("https://api.pro.coinbase.com/currencies")
           let obj = {};
 
           obj.id = prod.id;
+          obj.status = prod.status;
           let curObj = currencies.find((cur) => {
             return cur.id == prod.id.split("-")[0];
           });
@@ -77,7 +78,6 @@ var app = new Vue({
     checkedAssets: {
       ALL: false,
       USD: true,
-      USDC: true,
       USDT: true,
       BTC: false,
       EUR: false,
@@ -89,12 +89,12 @@ var app = new Vue({
   computed: {
     computeSortBy: function () {
       let filteredProducts = this.products
-        .map((item) => item.id)
-        .filter((pid) => {
-          let asset = pid.split("-")[1];
+        .filter((p) => {
+          let asset = p.id.split("-")[1];
 
-          return this.checkedAssets[asset];
-        });
+          return this.checkedAssets[asset] && p.status == "online";
+        })
+        .map((item) => item.id);
 
       return {
         alphabetical: () => {
@@ -137,7 +137,9 @@ var app = new Vue({
       };
     },
     product_ids: function () {
-      return this.products.map((item) => item.id);
+      return this.products
+        .filter((item) => item.status == "online")
+        .map((item) => item.id);
     },
   },
   methods: {
