@@ -1,9 +1,9 @@
-fetch("https://api.pro.coinbase.com/currencies")
+fetch("https://api.exchange.coinbase.com/currencies")
   .then((res) => {
     return res.json();
   })
   .then((currencies) => {
-    fetch("https://api.pro.coinbase.com/products")
+    fetch("https://api.exchange.coinbase.com/products")
       .then((res) => {
         return res.json();
       })
@@ -230,7 +230,7 @@ let unsubscribeTimeout = null;
 let aboutToUnsubscribe = false;
 
 function startWebSocketConnection() {
-  socket = new WebSocket("wss://ws-feed.pro.coinbase.com");
+  socket = new WebSocket("wss://ws-feed.exchange.coinbase.com");
   let subscribeMsg = {
     type: "subscribe",
     product_ids: app.product_ids,
